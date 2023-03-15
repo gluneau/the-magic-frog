@@ -1,23 +1,25 @@
-export default () => {
-  if (process.env.NODE_ENV !== 'production') return
+// import Vue from 'vue';
 
-  window.addEventListener("load", function() {
+export default ({ app }) => {
+  if (process.env.NODE_ENV !== 'production') return;
+
+  window.addEventListener('load', () => {
     window.cookieconsent.initialise({
-      "palette": {
-        "popup": {
-          "background": "#efefef",
-          "text": "#404040"
+      palette: {
+        popup: {
+          background: '#efefef',
+          text: '#404040',
         },
-        "button": {
-          "background": "#557f00"
-        }
+        button: {
+          background: '#557f00',
+        },
       },
-      "theme": "classic",
-      "content": {
-        "message": "The frog gave you a magic cookie to make you feel good! (And to keep you logged in...)",
-        "dismiss": "Cool! Thanks!",
-        "link": "A magic cookie?"
-      }
-    })
+      theme: 'classic',
+      content: {
+        message: app.i18n.t('cookie.message'),
+        dismiss: app.i18n.t('cookie.dismiss'),
+        link: app.i18n.t('cookie.link'),
+      },
+    });
   });
-}
+};

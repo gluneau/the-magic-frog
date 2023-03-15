@@ -3,173 +3,249 @@
     <NavbarLoggedIn v-if="user" :user="user" />
     <NavbarLoggedOut v-else />
     <b-container>
+      <!-- Header -->
       <div class="text-center py-5">
         <img src="/avatar.png" alt=""/>
-        <h1 class="pt-4">The Magic Frog</h1>
-        <h2>And The Magic Story Machine</h2>
-        <p class="lead pt-5">
-          Help the magic frog to remember all his interesting an fun stories by feeding the Magic Story Machine with your ideas how the story could go on! The machine then calculates the most likely (or funniest) answer and generates some golden coins for you to win, whenever a story is completed. You might even find some coins yourself just by taking part.
-        </p>
+        <h1 class="pt-4">{{ $t('index.themagicfrog') }}</h1>
+        <h2>{{ $t('index.storymachine') }}</h2>
+        <p class="lead pt-5">{{ $t('index.helpremember') }}</p>
       </div>
 
+      <!-- Pot -->
       <div class="text-center pb-5">
-        <h2 class="pt-5 pb-3">A Pot Full Of Gold</h2>
+        <h2 class="pt-5 pb-3">{{ $t('index.fullofgold') }}</h2>
         <img src="/pot.png" alt=""/>
-        <h5 class="mt-3">Current Value:</h5>
-        <h1 class="pot-value">$ {{ potValue }}</h1>
+        <h5 class="mt-3">{{ $t('index.currentvalue') }}</h5>
+        <h1 class="pot-value">{{ $t('index.endollar') }} {{ pot.total.toFixed(2) }} {{ $t('index.frdollar') }}</h1>
 
-        <div class="my-4">
-          <LikeButton @voteCasted="updateData" :user="user" likeLabel="Generate more coins!" unlikeLabel="Coins generated! Undo?" :author="latestStoryPost.author" :permlink="latestStoryPost.permlink" v-if="latestStoryPost && user" />
+        <div class="my-4" v-if="latestStoryPost">
+          <LikeButton @voteCasted="$store.dispatch('updateData')" :user="user" :likeLabel="$t('index.generatemore')" :unlikeLabel="$t('index.undogenerate')" :author="latestStoryPost.author" :permlink="latestStoryPost.permlink" v-if="latestStoryPost && user" />
           <b-button variant="primary" class="login-button" v-b-modal.scRedirectModal v-if="!user">
             <svg viewBox="0 0 24 24">
               <path d="M5,9V21H1V9H5M9,21A2,2 0 0,1 7,19V9C7,8.45 7.22,7.95 7.59,7.59L14.17,1L15.23,2.06C15.5,2.33 15.67,2.7 15.67,3.11L15.64,3.43L14.69,8H21C22.11,8 23,8.9 23,10V12C23,12.26 22.95,12.5 22.86,12.73L19.84,19.78C19.54,20.5 18.83,21 18,21H9M9,19H18.03L21,12V10H12.21L13.34,4.68L9,9.03V19Z" />
             </svg>
-            Login to generate more!
+            {{ $t('index.logintogeneratemore') }}
           </b-button>
+
+
+          <!-- Pot distribution -->
+          <div class="mt-3">
+            <button v-b-toggle="'rewardsInfo'" class="btn btn-sm btn-outline-secondary">
+              {{ $t('index.rewards.whogetswhat') }}
+              <i class="fas fa-chevron-down"></i>
+            </button>
+            <b-collapse id="rewardsInfo" class="border-box mx-auto mt-3" style="max-width: 400px;">
+              <ul class="list-group list-group-flush">
+                <li class="list-group-item bg-transparent" style="font-size: 1.2rem">
+                  {{ $t('index.rewards.luckystoryteller') }}: <b>{{ pot.winner.toFixed(2) }} HBD</b>
+                </li>
+                <li class="list-group-item">
+                  {{ $t('index.rewards.otherstorytellers') }}: <b>{{ (pot.others / latestStoryPostMeta.commands.length).toFixed(2) }} HBD</b><br>
+                  <small class="text-muted">({{ $t('index.rewards.otherstorytellersinfo') }})</small>
+                </li>
+                <li class="list-group-item">
+                  {{ $t('index.rewards.curators') }}: <b>{{ (pot.curators).toFixed(2) }} HBD</b><br>
+                  <small class="text-muted">({{ $t('index.rewards.curatorsinfo') }})</small>
+                </li>
+                <li class="list-group-item">
+                  {{ $t('index.rewards.delegators') }}: <b>{{ (pot.delegators).toFixed(2) }} HBD</b><br>
+                  <small class="text-muted">({{ $t('index.rewards.delegatorsinfo') }})</small>
+                </li>
+                <li class="list-group-item bg-transparent" v-if="user">
+                  {{ $t('index.rewards.youare') }}: <b>{{ youAre }}</b><br>
+                  {{ $t('index.rewards.estimatedreward') }}: <b>{{ estimatedUserReward }} HBD</b>
+                </li>
+              </ul>
+            </b-collapse>
+          </div>
         </div>
 
-        <p class="mt-5">
-          Yes, it's totally free to participate and you even get something for it! Isn't that great? And yes, we're talking about money. You might wonder who pays for this. Well, this website is indeed very magical. It's not only about the "magical" stories but also about the magic of technology, the magic of <i>the Blockchain</i> and digital currencies.<br>
-          <br>
-          This website issues a cryptocurrency called <i>STEEM</i> based on a decentralized community voting process. You can use this currency to give your own votes more weight or sell it for actual money. In a nutshell, STEEM enables you to earn, sell and buy <i>influence</i> in a global, decentralized content network.<br>
-          <br>
-          The influence of <i>The Magic Frog</i> and the whole STEEM community is used to reward the people that take part in this collaborative storytelling project. The content of the story however is based purely on vote counts and not the influence of the individual.
-        </p>
+        <!-- Explaination -->
+        <p class="mt-5" v-html="$t('index.itsfree')"></p>
+        <p v-html="$t('index.thiswebsite')"></p>
+        <p v-html="$t('index.theinfluence')"></p>
       </div>
 
-      <div class="py-5">
+      <!-- Current Story -->
+      <div class="py-5" v-if="latestStoryPost">
         <div class="text-center">
-          <h2>Read the current story</h2>
+          <h2>{{ $t('index.read') }}</h2>
           <img src="/divider.png" alt="" class="img-fluid"/>
-          <div id="currentStory" class="text-center" v-html="currentStoryBody"></div>
-          <h3>To be continued...</h3>
+          <div id="currentStory" class="text-center">
+            <h1 class="mb-4">{{ latestStoryPostMeta.startPhrase }}</h1>
+            <button type="button" class="btn btn-sm btn-outline-secondary mb-3" @click.prevent="$store.commit('setShowUsernames', false)" v-if="showUsernames">
+              {{ $t('index.hideusernames') }}
+            </button>
+            <button type="button" class="btn btn-sm btn-outline-secondary mb-3" @click.prevent="$store.commit('setShowUsernames', true)" v-else>
+              {{ $t('index.showusernames') }}
+            </button>
+            <StoryPart v-for="(part, index) in displayedStoryParts" :key="index" :part="part" />
+            <b-btn class="btn-outline-secondary" v-if="!showFullStory && latestStoryPostMeta.commands.length > 10" @click="showFullStory = true">{{ $t('index.readmore') }}</b-btn>
+            <h3 class="mt-4" v-if="!storyHasEnded">{{ $t('index.tobe') }}</h3>
+          </div>
           <img src="/divider.png" alt="" class="rotate-180 img-fluid"/>
         </div>
       </div>
 
-      <div class="mx-auto mb-4" style="max-width: 800px;">
-        <h2 class="pt-5">How will the story go on?</h2>
-        <p class="text-center mt-4">First, read how others see the story evolve and vote for them if you like it.</p>
+      <!-- Continue -->
+      <div class="mx-auto mb-4" style="max-width: 800px;" v-if="latestStoryPost && !storyHasEnded">
+        <h2 class="pt-5">{{ $t('index.howwillthestorygoon') }}</h2>
+        <p class="text-center mt-4">{{ $t('index.firstread') }}</p>
 
+        <!-- Current Submissions -->
         <div id="comments">
           <Command v-for="command in currentCommands" :key="command.id" :command="command" :user="user" />
-          <p class="text-center" v-if="!currentCommands.length">There are no comments today yet. Be the first one!</p>
+          <p class="text-center" v-if="!currentCommands.length">{{ $t('index.thereareno') }}</p>
         </div>
 
-        <h2 class="pt-5">Now it's your turn!</h2>
-        <p class="text-center mt-4">Continue writing the story where it stopped, so that it is funny or exciting to read and maybe even makes a bit of sense. Be creative!</p>
+        <h2 class="pt-5">{{ $t('index.nowitsyourturn') }}</h2>
+        <p class="text-center mt-4">{{ $t('index.continuewriting') }}</p>
 
-        <form class="mt-4 p-3 mx-auto" id="command-form" style="max-width: 500px;" v-if="user" @submit.prevent="submitComment">
-          <div v-if="!endStory">
-            <input class="w-100" id="command" placeholder="And they lived happily ever after..." v-model="commandInput" @keyup="limitCommandCharacters" @keydown="limitCommandCharacters" />
-            <sup class="d-block text-center pt-3"><span id="command-char-count">{{ commandCharactersLeft }}</span> characters left.</sup>
-            <p class="text-center mt-4 mb-1" v-if="currentStoryPosts.length > 10">
-              No, I don't want this story to be continued!<br>
-              <b-button class="btn btn-outline-danger mt-3" @click="endStory = true">Stop it!</b-button>
+        <!-- Submission Form -->
+        <form class="mt-4 p-4 mx-auto command-form border-box" style="max-width: 500px;" @submit.prevent="submitComment">
+          <!-- Guest Note -->
+          <div v-if="!user" class="alert alert-info mx-auto" style="max-width: 500px;">
+            {{ $t('index.form.guestnote') }}
+          </div>
+
+          <!-- Login/Signup if not logged in -->
+          <div v-if="!user" class="text-center mb-3">
+            <b-button variant="primary" v-b-modal.scRedirectModal>
+              <svg viewBox="0 0 24 24">
+                <path d="M22,2C22,2 14.36,1.63 8.34,9.88C3.72,16.21 2,22 2,22L3.94,21C5.38,18.5 6.13,17.47 7.54,16C10.07,16.74 12.71,16.65 15,14C13,13.44 11.4,13.57 9.04,13.81C11.69,12 13.5,11.6 16,12L17,10C15.2,9.66 14,9.63 12.22,10.04C14.19,8.65 15.56,7.87 18,8L19.21,6.07C17.65,5.96 16.71,6.13 14.92,6.57C16.53,5.11 18,4.45 20.14,4.32C20.14,4.32 21.19,2.43 22,2Z" />
+              </svg>
+              {{ $t('nav.login') }}
+            </b-button>
+            <b-button variant="primary" class="ml-2" v-b-modal.steemSignupModal>
+              <svg viewBox="0 0 24 24">
+                <path d="M22,2C22,2 14.36,1.63 8.34,9.88C3.72,16.21 2,22 2,22L3.94,21C5.38,18.5 6.13,17.47 7.54,16C10.07,16.74 12.71,16.65 15,14C13,13.44 11.4,13.57 9.04,13.81C11.69,12 13.5,11.6 16,12L17,10C15.2,9.66 14,9.63 12.22,10.04C14.19,8.65 15.56,7.87 18,8L19.21,6.07C17.65,5.96 16.71,6.13 14.92,6.57C16.53,5.11 18,4.45 20.14,4.32C20.14,4.32 21.19,2.43 22,2Z" />
+              </svg>
+              {{ $t('nav.signup') }}
+            </b-button>
+          </div>
+
+          <!-- Append textarea -->
+          <textarea class="w-100" id="command" :placeholder="$t('index.form.appendplaceholder')" v-model="commandInput" @keyup="limitCommandCharacters" @keydown="limitCommandCharacters"></textarea>
+          <sup class="d-block text-center text-muted pt-3"><span id="command-char-count">{{ commandCharactersLeft }}</span> {{ $t('index.form.charactersleft') }}</sup>
+
+          <!-- Image Upload -->
+          <div v-if="!showImageUpload" class="text-center my-4">
+            <p v-html="$t('index.form.youcaneven')"></p>
+            <b-button  @click="showImageUpload = true" class="btn btn-outline-success">{{ $t('index.form.yesupload') }}</b-button>
+          </div>
+          <div v-if="showImageUpload">
+            <p class="text-center my-4">
+              <b-alert variant="info"
+                       dismissible
+                       :show="showImageUploadInfo"
+                       @dismissed="showImageUploadInfo=false"
+                       class="text-left"
+                       v-html="$t('index.form.licensenote')">
+              </b-alert>
+              <input type="file" v-on:change="onImageChange" class="w-100 d-block" ref="image" />
+              <img :src="image" v-if="image" alt="uploaded image" class="img-fluid w-100 uploaded-image" />
+              <b-button size="sm" class="btn btn-outline-danger mt-3" @click="resetImage">{{ $t('index.form.changedmymind') }}</b-button>
             </p>
+            <div class="upload-spinner" v-if="imageIsUploading">
+              <div class="dot1"></div>
+              <div class="dot2"></div>
+            </div>
           </div>
-          <div v-if="endStory" class="text-center">
-            <h3><i>The End!</i></h3>
-            <sup>A new story will start!</sup><br>
-            <b-button class="btn btn-outline-success mt-3" @click="endStory = false">No, just kidding....</b-button>
+
+          <hr>
+
+          <div v-if="!endStory">
+            <!-- End Story -->
+            <div v-if="user">
+              <div v-if="currentStoryPosts.length > 10">
+                <p class="text-center my-4">
+                  <span v-if="!commandInput">{{ $t('index.form.stopit') }}</span>
+                  <span v-else>{{ $t('index.form.stopit2') }}</span>
+                  <br>
+                  <b-button class="btn btn-outline-danger mt-3 the-end-button" @click="endStory = true">{{ $t('index.form.theend') }}</b-button>
+                </p>
+              </div>
+              <div v-else>
+                <p class="text-center my-4">
+                  <small class="text-muted"><i>{{ $t('index.form.after10days') }}</i></small>
+                </p>
+              </div>
+            </div>
           </div>
-          <p class="text-center mt-4 mb-1">Here you can add a personal note if you want:</p>
-          <textarea class="w-100" placeholder="What an amazing story!" v-model="commentInput"></textarea>
-          <div v-if="showSuccessMessage" class="text-center alert alert-success">
-            Thank you for participating!
+
+          <!-- The End (Submit "The End" or Upvote other's "The End" submission if exists) -->
+          <div v-if="endStory" class="text-center mb-4">
+            <h3><i>{{ $t('index.form.theend') }}</i></h3>
+            <div v-if="endCommand">
+              <p v-html="$t('index.form.endalreadysuggested', {potValue: pot.total.toFixed(2)})"></p>
+              <Command :command="endCommand" :user="user" />
+            </div>
+            <div v-else>
+              <p v-html="$t('index.form.ifthecommunity', {potValue: pot.total.toFixed(2)})"></p>
+            </div>
+            <b-button class="btn btn-outline-success mt-3" @click="endStory = false">{{ $t('index.form.justkidding') }}</b-button>
           </div>
-          <button class="btn btn-primary d-block w-100 mt-3" v-if="!showSuccessMessage">
-            <svg class="spinner" viewBox="0 0 24 24" v-if="submitLoading">
-              <path d="M12,4V2A10,10 0 0,0 2,12H4A8,8 0 0,1 12,4Z" />
-            </svg>
-            Submit!
-          </button>
+
+          <!-- Personal Note and Submit Button -->
+          <div v-if="!(endStory && endCommand)">
+            <hr>
+            <p class="text-center mt-4 mb-1">{{ $t('index.form.addpersonalnote') }}</p>
+            <textarea class="w-100" :placeholder="$t('index.form.commentplaceholder')" v-model="commentInput"></textarea>
+            <div v-if="showSuccessMessage" class="text-center alert alert-success">
+              {{ $t('index.form.thanksforparticipating') }}
+            </div>
+            <b-button v-if="showSuccessMessage" class="btn btn-sm btn-block btn-outline-success mt-3" @click="showSuccessMessage= false">{{ $t('index.form.participateagain') }}</b-button>
+            <button class="btn btn-primary d-block w-100 mt-3" v-if="!showSuccessMessage">
+              <svg class="spinner" viewBox="0 0 24 24" v-if="submitLoading">
+                <path d="M12,4V2A10,10 0 0,0 2,12H4A8,8 0 0,1 12,4Z" />
+              </svg>
+              {{ $t('index.form.submit') }}
+            </button>
+          </div>
         </form>
-        <div v-if="!user" class="text-center">
-          <b-button variant="primary" class="login-button mx-auto" v-b-modal.scRedirectModal>
-            <svg viewBox="0 0 24 24">
-              <path d="M22,2C22,2 14.36,1.63 8.34,9.88C3.72,16.21 2,22 2,22L3.94,21C5.38,18.5 6.13,17.47 7.54,16C10.07,16.74 12.71,16.65 15,14C13,13.44 11.4,13.57 9.04,13.81C11.69,12 13.5,11.6 16,12L17,10C15.2,9.66 14,9.63 12.22,10.04C14.19,8.65 15.56,7.87 18,8L19.21,6.07C17.65,5.96 16.71,6.13 14.92,6.57C16.53,5.11 18,4.45 20.14,4.32C20.14,4.32 21.19,2.43 22,2Z" />
-            </svg>
-            Log in to write!
-          </b-button>
-        </div>
+      </div>
+
+      <div class="mb-4 text-center" v-if="latestStoryPost && storyHasEnded">
+        <h1>{{ $t('index.newstory.title') }}</h1>
+        <p v-html="$t('index.newstory.text', {account: $account})"></p>
+      </div>
+
+      <!-- Starting Soon notification for new instances where no post is published yet -->
+      <div class="mb-4 text-center" v-if="!latestStoryPost && !storyHasEnded">
+        <h1>{{ $t('index.startingsoon.title') }}</h1>
+        <h3 v-html="$t('index.startingsoon.text', {account: $account})"></h3>
       </div>
     </b-container>
 
     <Footer />
+    <Modals :user="user" />
 
-    <b-modal id="whatIsThisModal" hide-footer title="What is this?">
-      <p>
-        On this website you can take part in a collaborative story. Everyone can submit the next little piece of the story and the community decides every day, through voting, which part gets appended. You can therefore submit something everyday. If your submission makes it into the story, you have a chance to win the story pot. The more you can contribute to the story, the higher your chances are.<br>
-        <br>
-        Utilizing the <a href="https://steem.io" target="_blank"><i>STEEM blockchain</i></a>, this website generates <i>Cryptocurrency</i>, everytime the story proceeds. Those coins are collected in the story pot and released everytime a story ends. It's also up to you, when this will happen. After the first 10 days of each story, you will be able to suggest to end the story. If the community agrees, a new story will start the next day and the current pot will be raffled among all contributors.<br>
-        <br>
-        Even if you don't make it into the story, you will earn a tiny little bit of STEEM cryptocurrency, everytime you submit something, no matter if the community decides to append it or not.<br>
-        <br>
-        The first story is about the Magic Frog and his Master Wizard.
-      </p>
-      <h5 class="my-4"><a href="https://steemit.com/introduceyourself/@the-magic-frog/this-is-the-magic-story-machine-help-the-not-so-magic-frog-collaborative-storytelling-click-it-there-s-money-to-win" target="_blank">Read the intro.</a></h5>
-      <p>
-        Once this initial story is finished, all future stories will start with „Once upon a time,...“ and from there on it's up to you and the community.<br>
-        <br>
-        <b>There are no specific rules but please try to be constructive, positive and respectful! The stories can be serious, funny, weird or total nonsense. That's up to you! ;)</b>
-      </p>
-      <h4 class="mt-4">Have Fun!</h4>
-    </b-modal>
-
-    <b-modal id="scRedirectModal" title="Login with SteemConnect">
-      In order to participate you need a Steem account. You will be redirected to SteemConnect to authenticate to the Steem blockchain. SteemConnect is developed and maintained by Steemit, Inc. and Busy.org.
-      <div slot="modal-footer" class="w-100 text-center">
-        <a :href="loginUrl" class="btn btn-primary">Login with SteemConnect</a>
+    <no-ssr>
+      <div>
+        <notifications :group="'success'" :position="'top center'" :classes="'vue-notification success'" :duration="8000" />
+        <notifications :group="'errors'" :position="'top center'" :classes="'vue-notification error'" :duration="8000" />
       </div>
-    </b-modal>
-
-    <b-modal id="steemSignupModal" title="Create a Steem account">
-      In order to participate you need a Steem account. Steem is a blockchain platform that rewards content creators with the cryptocurrency STEEM. Once your Steem account has been verified and enabled, you can use it to log in.<br>
-      <br>
-      There are a lot more interesting apps and websites you can access with this account. You'll probably need one sooner or later anyway, so don't hesitate... it's free!<br>
-      <br>
-      <a href="https://steem.io/" target="_blank">Learn more about Steem!</a>
-      <div class="alert alert-info mt-4">
-        <b>IMPORTANT NOTE:</b><br><br>Due to the decentralized nature of the Steem platform, there is no central authority you can ask to recover your account in case you lose access to it.<br>
-        <br>
-        Choose a <b>secure password</b> and make sure you <b>keep it safe</b>. Ideally you simply write it down on a piece of paper and store in a safe place.<br>
-        <br>
-        <b>You have full responsibility for the security of your account and the rewards you earn.</b>
-      </div>
-      You will be redirected to the sign-up process of steemit.com.
-      <div slot="modal-footer" class="w-100 text-center">
-        <a href="https://signup.steemit.com/?ref=the-magic-frog" class="btn btn-primary">Create a Steem account</a>
-      </div>
-    </b-modal>
-
-    <b-modal id="userModal" :title="user.name" v-if="user" hide-footer>
-      <div class="alert alert-info text-center">
-        Here you will soon be able to access and manage all your STEEM funds. In the meantime, you can access your wallet here:
-        <h4><a :href="'https://steemit.com/@' + user.name + '/transfers'" target="_blank">steemit.com</a></h4>
-      </div>
-      <h4>Your Account Balance</h4>
-      <div class="text-center">
-        {{ user.account.balance }}<br>
-        {{ user.account.sbd_balance }}
-      </div>
-    </b-modal>
-
-    <notifications group="errors" classes="vue-notification error" position="top center" :duration="8000" />
+    </no-ssr>
   </section>
 </template>
 
 <script>
-import steem from 'steem'
-import sc2 from 'sc2-sdk'
+import axios from 'axios'
+import steem from 'steem-js-patched'
 import marked from 'marked'
-import Cookies from 'js-cookie'
+
+import { mapGetters } from 'vuex'
 
 import NavbarLoggedIn from '~/components/NavbarLoggedIn'
 import NavbarLoggedOut from '~/components/NavbarLoggedOut'
 import LikeButton from '~/components/LikeButton'
 import Command from '~/components/Command'
+import StoryPart from '~/components/StoryPart'
 import Footer from '~/components/Footer'
+import Modals from '~/components/Modals'
+
+// TODO: account creation proxy account... brilliant!
+// TODO: add comment preview
 
 export default {
   components: {
@@ -177,99 +253,106 @@ export default {
     NavbarLoggedOut,
     LikeButton,
     Command,
-    Footer
+    StoryPart,
+    Footer,
+    Modals
+  },
+  head() {
+    // localizing meta description
+    return { 
+      title: this.$t('index.themagicfrog'),
+      meta: [
+        { hid: 'description', name: 'description', content: this.$t('index.description') }
+      ] 
+    }
   },
   data() {
     return {
-      user: null,
-      endStory: false,
-      commandInput: '',
-      commentInput: '',
-      submitLoading: false,
-      showSuccessMessage: false
+      endStory: false, // true when user clicks "The End" to suggest the end of the story
+      commandInput: '', // input for the text to append to the story
+      commentInput: '', // additional comment input
+      submitLoading: false, // loading indicator for form submit
+      showSuccessMessage: false,
+      image: null, // image url from imgur upload
+      imageIsUploading: false, // loading indicator for image upload
+      showImageUpload: false,
+      showImageUploadInfo: true,
+      showFullStory: false,
     }
-  },
-  async asyncData() {
-    const getPosts = (accountName, limit = 100) => {
-      return new Promise((resolve, reject) => {
-        steem.api.getDiscussionsByBlog({tag: accountName, limit: limit}, (err, posts) => {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(posts);
-          }
-        });
-      });
-    };
-
-    const getComments = (accountName, permlink) => {
-      return new Promise((resolve, reject) => {
-        steem.api.getContentReplies(accountName, permlink, function(err, comments) {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(comments);
-          }
-        });
-      });
-    };
-
-    let accountName = 'the-magic-frog';
-    let posts = await getPosts(accountName);
-    let comments = [];
-    for (let i = 0; i < posts.length; i++) {
-      let meta = JSON.parse(posts[i].json_metadata);
-      if (meta.hasOwnProperty('day') && meta.hasOwnProperty('storyNumber')) {
-        comments = await getComments(accountName, posts[i].permlink);
-        break;
-      }
-    }
-
-    return { posts, comments }
   },
   computed: {
-    sc2() {
-      const api = sc2.Initialize({
-        app: 'themagicfrog.app',
-        callbackURL: process.env.baseUrl + '/auth',
-        scope: ['vote', 'comment']
+    ...mapGetters('hivesigner', ['user']),
+    ...mapGetters(['pot', 'currentCommands', 'allStoryPosts', 'delegators', 'curators', 'showUsernames']),
+    isDelegator () {
+      return this.delegators.findIndex(delegator => {
+        return delegator.delegator === this.user.account.name
+      }) !== -1;
+    },
+    isCurator () {
+      return this.curators.findIndex(curator => {
+        return curator.voter === this.user.account.name
+      }) !== -1;
+    },
+    isStoryteller () {
+      return this.latestStoryPostMeta.commands.findIndex(command => {
+        return command.user === this.user.account.name
+      }) !== -1;
+    },
+    youAre () {
+      let roles = [];
+      if (this.isStoryteller) roles.push(this.$t('index.rewards.storyteller'));
+      if (this.isCurator) roles.push(this.$t('index.rewards.curator'));
+      if (this.isDelegator) roles.push(this.$t('index.rewards.delegator'));
+
+      return roles.join(', ')
+    },
+    estimatedUserReward () {
+      let reward = 0;
+      let contributions = 0;
+
+      // storyteller rewards
+      if (this.isStoryteller) {
+        this.latestStoryPostMeta.commands.forEach(command => {
+          if (command.user === this.user.account.name) contributions++;
+        });
+        if (contributions) {
+          reward += (this.pot.others / this.latestStoryPostMeta.commands.length * contributions);
+        }
+      }
+
+      if (this.isCurator) {
+        let curator = this.curators.find(curator => curator.voter === this.user.account.name)
+        if (curator) {
+          let percentage = curator.rshares / this.totalCuration * 100;
+          reward += (this.pot.curators) * percentage / 100;
+        }
+      }
+
+      if (this.isDelegator) {
+        let delegator = this.delegators.find(delegator => delegator.delegator === this.user.account.name)
+        if (delegator) {
+          let percentage = delegator.sp / this.totalDelegation * 100;
+          reward += (this.pot.delegators) * percentage / 100;
+        }
+      }
+
+      return reward.toFixed(2);
+    },
+    totalCuration () {
+      let totalCuration = 0;
+      this.curators.forEach(curator => {
+        totalCuration += curator.rshares;
       });
 
-      const accessToken = Cookies.get('frog_token');
-      if (accessToken) {
-        api.setAccessToken(accessToken);
-        api.me((err, user) => {
-          if (err) {
-            console.log(err);
-          } else {
-            this.user = user;
-          }
-        });
-      }
-      return api;
+      return totalCuration;
     },
-    loginUrl() {
-      return this.sc2.getLoginURL();
-    },
-    potValue() {
-      let pot = 0;
-      for (let i = 0; i < this.currentStoryPosts.length; i++) {
-        pot += parseFloat(this.getPostPot(this.currentStoryPosts[i]));
-      }
-      return pot.toFixed(2);
-    },
-    participants() {
-      let meta = JSON.parse(this.latestStoryPost.json_metadata);
-      return meta.hasOwnProperty('participants') ? meta.participants : {};
-    },
-    participantsCount() {
-      return Object.keys(this.participants).length;
-    },
-    allStoryPosts() {
-      return this.posts.filter(post => {
-        let meta = JSON.parse(post.json_metadata);
-        return meta.hasOwnProperty('day') && meta.hasOwnProperty('storyNumber');
+    totalDelegation () {
+      let totalDelegation = 0;
+      this.delegators.forEach(delegator => {
+        totalDelegation += delegator.sp;
       });
+
+      return totalDelegation;
     },
     currentStoryPosts() {
       return this.allStoryPosts.filter(post => {
@@ -278,281 +361,249 @@ export default {
       });
     },
     currentStoryNumber() {
-      let meta = JSON.parse(this.latestStoryPost.json_metadata);
-      return meta.storyNumber
-    },
-    currentStoryBody() {
-      let storyBody = marked(this.getStoryPart(this.latestStoryPost.body));
-      storyBody = storyBody.replace(/\(by @([\w-.]+)\)/g, '<br><span class="author">by <a href="https://steemit.com/@$1">@$1</a></span>');
-      return storyBody;
+      return this.latestStoryPostMeta.storyNumber
     },
     latestStoryPost() {
       return this.allStoryPosts[0];
     },
-    currentCommands() {
-      return this.comments.filter(comment => {
-        let meta = JSON.parse(this.latestStoryPost.json_metadata);
-        let command = comment.body.split('\n')[0];
-        if (command === '> The End!' && meta.day > 10) {
-          return true;
-        } else if (command.indexOf('> ') === 0 && command.length <= 252) {
-          return true;
+    latestStoryPostMeta() {
+      return this.latestStoryPost ? JSON.parse(this.latestStoryPost.json_metadata) : {};
+    },
+    displayedStoryParts() {
+      if (this.showFullStory || this.latestStoryPostMeta.commands.length < 11) {
+        return this.latestStoryPostMeta.commands
+      }
+
+      return this.latestStoryPostMeta.commands.slice(0, 10)
+    },
+    storyHasEnded() {
+      return this.latestStoryPostMeta.commands
+        && this.latestStoryPostMeta.commands.length
+        && this.latestStoryPostMeta.commands[this.latestStoryPostMeta.commands.length - 1].type === 'end'
+    },
+    endCommand() {
+      let endCommand = null;
+      this.currentCommands.forEach(comment => {
+        let meta = JSON.parse(comment.json_metadata);
+        if (meta.type === 'end') {
+          endCommand = comment;
         }
-        return false;
       });
+      return endCommand;
     },
     commandCharactersLeft() {
-      return 250 - this.commandInput.length;
+      return Math.max(250 - this.commandInput.length, 0);
     }
   },
   methods: {
-    async updateData() {
-      console.log('updated data');
-      const getPosts = (accountName, limit = 100) => {
-        return new Promise((resolve, reject) => {
-          steem.api.getDiscussionsByBlog({tag: accountName, limit: limit}, (err, posts) => {
-            if (err) {
-              reject(err);
-            } else {
-              resolve(posts);
-            }
-          });
-        });
-      };
-
-      const getComments = (accountName, permlink) => {
-        return new Promise((resolve, reject) => {
-          steem.api.getContentReplies(accountName, permlink, function(err, comments) {
-            if (err) {
-              reject(err);
-            } else {
-              resolve(comments);
-            }
-          });
-        });
-      };
-
-      let accountName = 'the-magic-frog';
-      let posts = await getPosts(accountName);
-      let comments = [];
-      for (let i = 0; i < posts.length; i++) {
-        let meta = JSON.parse(posts[i].json_metadata);
-        if (meta.hasOwnProperty('day') && meta.hasOwnProperty('storyNumber')) {
-          comments = await getComments(accountName, posts[i].permlink);
-          break;
-        }
-      }
-
-      this.posts = posts;
-      this.comments = comments;
-    },
     limitCommandCharacters() {
       this.commandInput = this.commandInput.substr(0, 250);
     },
-    getStoryPart(body) {
-      const start = body.indexOf('# Once upon a time,');
-      const end = body.indexOf('## To be continued!');
-      if (start !== -1 && end !== -1) {
-        return body.slice(start, end);
-      } else {
-        console.log('Could not find story part in content. :(');
-        return false;
-      }
-    },
-    getPostPot(post) {
-      if (post.last_payout === '1970-01-01T00:00:00') {
-        return parseFloat(post.pending_payout_value.replace(' SBD', '')) * 0.75 / 2;
-      }
-
-      return (parseFloat(post.total_payout_value.replace(' SBD', '')) / 2).toFixed(2);
-    },
-    logout() {
-      this.user = null;
-      Cookies.remove('frog_token');
-      return null;
-    },
     submitComment() {
-      let body = null;
-      if (this.endStory) {
-        body = '> The End!\n\n' + this.commentInput;
-      } else if (this.commandInput && this.commandInput.length < 250) {
-        body = '> ' + this.commandInput + '\n\n' + this.commentInput;
+      if (this.commandInput.length < 251) {
+        // if there's no user, use submitGuestComment instead
+        if (this.user) {
+          // comment's json_metadata
+          let meta = {
+            type: this.endStory ? 'end' : 'append',
+            appendText: this.commandInput.trim(),
+            comment: this.commentInput.trim(),
+            image: this.image || '', // don't set to null, would be removed if edited via hive.io
+            author: this.user.name
+          };
+
+          if (meta.appendText || meta.image || this.endStory) {
+            // build comment body
+            let body = '';
+            if (meta.appendText) {
+              body += '> ' + meta.appendText + '\n\n';
+            }
+            if (meta.image) {
+              body += '> ![image-' + (new Date()).getTime() + '](' + meta.image + ')\n\n';
+            }
+            if (this.endStory) {
+              body += '> ### '+ this.$t('index.form.theend') +'!\n\n'
+            }
+            if (meta.comment) {
+              body += meta.comment;
+            }
+
+            // unique permlink
+            let permlink = 're-' + this.latestStoryPost.permlink + '-command-' + (new Date()).getTime();
+
+            // broadcast
+            this.submitLoading = true;
+            this.$hivesigner.comment(
+              this.$account,
+              this.latestStoryPost.permlink,
+              this.user.name,
+              permlink,
+              '',
+              body,
+              meta,
+              (err) => {
+                if (err) {
+                  console.log(err);
+                  this.$notify({
+                    group: 'errors',
+                    title: 'Oh no! An error occurred! :(!',
+                    text: 'This action could not be completed due to an unknown error. Maybe a nasty curse...'
+                  });
+                } else {
+                  // reset form
+                  this.commandInput = '';
+                  this.commentInput = '';
+                  this.submitLoading = false;
+                  this.showSuccessMessage = true;
+                  this.showImageUpload = false;
+                  this.image = null;
+                  this.endStory = false;
+                  if (this.$refs.image) {
+                    this.$refs.image.value = null;
+                  }
+
+                  // update data from blockchain (posts/comments)
+                  this.$store.dispatch('updateData')
+
+                  this.$notify({
+                    group: 'success',
+                    title: 'Submission successful!',
+                    text: 'Thank you for helping to tell a magic story!'
+                  });
+                }
+              }
+            );
+          }
+        } else {
+          // if not logged in, submit as guest
+          this.submitGuestComment();
+        }
       }
+    },
+    submitGuestComment() {
+      if (this.commandInput.length < 251) {
+        // comment's json_metadata
+        let meta = {
+          type: 'append',
+          appendText: this.commandInput.trim(),
+          comment: this.commentInput.trim(),
+          image: this.image || '', // don't set to null, would be removed if edited via hive.io
+          author: 'the-fly-swarm'
+        };
 
-      if (body) {
-        let permlink = 're-' + this.latestStoryPost.permlink + '-command-' + (new Date()).getTime();
+        if (meta.appendText || meta.image) {
+          // build comment body
+          let body = '';
+          if (meta.appendText) {
+            body += '> ' + meta.appendText + '\n\n';
+          }
+          if (meta.image) {
+            body += '> ![image-' + (new Date()).getTime() + '](' + meta.image + ')\n\n';
+          }
+          if (meta.comment) {
+            body += meta.comment;
+          }
 
-        this.submitLoading = true;
-        this.sc2.comment(
-          'the-magic-frog',
-          this.latestStoryPost.permlink,
-          this.user.name,
-          permlink,
-          '',
-          body,
-          null,
-          (err) => {
+          // unique permlink
+          let permlink = 're-' + this.latestStoryPost.permlink + '-command-' + (new Date()).getTime();
+
+          // broadcast
+          this.submitLoading = true;
+          steem.broadcast.comment(process.env.guestAccountKey, this.$account, this.latestStoryPost.permlink, 'the-fly-swarm', permlink, '', body, meta, (err) => {
             if (err) {
               console.log(err);
+              this.$notify({
+                group: 'errors',
+                title: 'Oh no! An error occurred! :(!',
+                text: 'This action could not be completed due to an unknown error. Maybe a nasty curse...'
+              });
             } else {
+              // reset form
               this.commandInput = '';
               this.commentInput = '';
               this.submitLoading = false;
               this.showSuccessMessage = true;
+              this.showImageUpload = false;
+              this.image = null;
+              if (this.$refs.image) {
+                this.$refs.image.value = null;
+              }
 
-              steem.api.getContentReplies('the-magic-frog', this.latestStoryPost.permlink, (err, comments) => {
-                if (err) {
-                  console.log(err);
-                } else {
-                  this.comments = comments;
-                }
+              // update data from blockchain (posts/comments)
+              this.$store.dispatch('updateData')
+
+              this.$notify({
+                group: 'success',
+                title: 'Submission successful!',
+                text: 'Thank you for helping to tell a magic story!'
               });
             }
-          }
-        );
+          });
+        }
       }
+    },
+    onImageChange() {
+      // TODO: add validation of filesize and type
+
+      // check browser support
+      if (!window || !window.File || !window.FileReader || !window.FileList || !window.Blob) {
+        alert('The File APIs are not fully supported in this browser.');
+      } else if (!this.$refs.image.files) {
+        alert('This browser doesn\'t seem to support the `files` property of file inputs.');
+      } else if (!this.$refs.image.files[0]) {
+        alert("No file selected.");
+      } else {
+        // get file from input
+        let file = this.$refs.image.files[0];
+
+        // read actual file and upload to imgur
+        let fr = new FileReader();
+        fr.onload = () => {
+          this.imageIsUploading = true;
+
+          let data = fr.result;
+          let base64image = data.replace('data:image/png;base64,', '')
+            .replace('data:image/jpg;base64,', '')
+            .replace('data:image/jpeg;base64,', '')
+            .replace('data:image/gif;base64,', '');
+
+          // popst image to imgur
+          axios({
+            method: 'post',
+            url: 'https://api.imgur.com/3/image',
+            data: {
+              image: base64image,
+              type: 'base64'
+            },
+            headers: {
+              'Authorization': 'Client-ID a57bbb06e896db0',
+              'content-type': 'application/json'
+            },
+          }).then(result => {
+            // and story the result
+            this.imageIsUploading = false;
+            this.image = result.data.data.link;
+          });
+        };
+        fr.readAsDataURL(file);
+      }
+    },
+    resetImage() {
+      this.image = null;
+      this.showImageUpload = false;
+      this.$refs.image.value = null;
     }
   },
-  events: {
-    onVoteCasted: function () {
-      this.updateData();
-    },
+  async mounted () {
+    // login
+    this.$store.dispatch('hivesigner/login')
+
+    // fetch data
+    this.$store.dispatch('fetchPot')
+    this.$store.dispatch('fetchCurrentCommands')
+    this.$store.dispatch('fetchAllStoryPosts')
+    this.$store.dispatch('fetchDelegators')
+    this.$store.dispatch('fetchCurators')
   }
 }
 </script>
-
-<style lang="sass">
-  *
-    outline: none !important
-
-  .green
-    color: #557F00
-
-  .green-light
-    color: #80BF00
-
-  .green-dark
-    color: #2B4000
-
-  a
-    color: #557F00
-
-    &:hover
-      color: #2B4000
-
-  .btn-primary:not(:disabled):not(.disabled)
-    background: #557F00
-    border-color: #2B4000
-
-  .btn-primary:not(:disabled):not(.disabled).active,
-  .btn-primary:not(:disabled):not(.disabled):active,
-  .btn-primary:not(:disabled):not(.disabled):active:focus,
-  .btn-primary:not(:disabled):not(.disabled):focus,
-  .show > .btn-primary.dropdown-toggle
-    background: #2B4000
-    border-color: #2B4000
-    box-shadow: 0 0 0 0.2rem rgba(128, 191, 0, .5)
-
-  .rotate-180
-    transform: rotate(180deg)
-
-  h1, h2, h3, h4, h5
-    font-family: 'Berkshire Swash', cursive
-    text-align: center
-
-  #currentStory,
-  #currentStory p
-    font-weight: normal
-    font-size: 1.2rem
-
-    .author
-      color: #aaa
-      font-size: .8rem
-
-  input,
-  textarea
-    border-radius: 5px
-    border: solid 2px #ccc
-    font-size: 1.2rem
-    padding: 5px 10px
-    box-shadow: inset 0 -3px 5px rgba(0, 0, 0, .1)
-
-  p
-    font-weight: 300
-
-  .btn
-    svg
-      width: 16px
-      margin-top: -3px
-      vertical-align: middle
-      path
-        fill: #fff
-        transition: fill .3s ease
-    &.btn-outline-secondary
-      color: #aaa
-      border-color: #ccc
-      svg
-        path
-          fill: #aaa
-      &:hover,
-      &:active,
-      &:focus
-        color: #fff
-        background: #ccc
-        border-color: #bbb
-        svg
-          path
-            fill: #fff
-    &.btn-lg
-      line-height: 26px
-      svg
-        margin-top: -4px
-        width: 20px
-    &.btn-sm
-      line-height: 20px
-      svg
-        margin-top: -2px
-        width: 14px
-    .spinner
-      animation-name: spin
-      animation-duration: 1s
-      animation-iteration-count: infinite
-      animation-timing-function: linear
-
-      @-moz-keyframes spin
-        from
-          -moz-transform: rotate(0deg)
-        to
-          -moz-transform: rotate(360deg)
-
-      @-webkit-keyframes spin
-        from
-          -webkit-transform: rotate(0deg)
-        to
-          -webkit-transform: rotate(360deg)
-
-      @keyframes spin
-        from
-          transform: rotate(0deg)
-        to
-          transform: rotate(360deg)
-
-  #currentStory,
-  #currentStory p
-    font-weight: normal
-
-  #currentStory
-    h1
-      &:first-child
-        margin-bottom: 40px
-
-  #command-form
-    border: solid 1px #ddd
-    border-radius: 10px
-
-  .pot-value
-    font-size: 3rem
-
-  .notifications
-    top: 5px !important
-</style>
