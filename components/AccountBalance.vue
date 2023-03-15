@@ -28,12 +28,12 @@
       }
     },
     mounted() {
-      // getting hive price (cmc id 1230)
-      axios.get('https://api.coinmarketcap.com/v2/ticker/1230/').then(hivePrice => {
-        // getting hbd price (cmc id 1312)
-        axios.get('https://api.coinmarketcap.com/v2/ticker/1312/').then(hbdPrice => {
-          this.hivePrice = hivePrice.data.data.quotes.USD.price;
-          this.hbdPrice = hbdPrice.data.data.quotes.USD.price;
+      // getting hive price (api/v3/coins/hive)
+      axios.get('https://api.coingecko.com/api/v3/coins/hive').then(hivePrice => {
+        // getting hbd price (api/v3/coins/hive)
+        axios.get('https://api.coingecko.com/api/v3/coins/steem-dollars').then(hbdPrice => {
+          this.hivePrice = hivePrice.data.data.market_data.current_price.usd;
+          this.hbdPrice = hbdPrice.data.data.market_data.current_price.usd;
         }).catch((err) => {
           console.log(err);
         });
