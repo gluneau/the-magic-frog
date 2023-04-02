@@ -1,27 +1,15 @@
-require('dotenv').config();
-const pkg = require('./package');
-// Allow self signed certs for dev
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+export default {
+  // Target: https://go.nuxtjs.dev/config-target
+  target: 'static',
 
-module.exports = {
-  mode: 'universal',
-  env: {
-    guestAccountKey: process.env.GUEST_ACCOUNT_KEY || '',
-    scRedirectUrl: process.env.SC_REDIRECT_URL || 'http://localhost:3000/auth',
-    apiUrl: process.env.API_URL || 'https://localhost:3333',
-    locale: process.env.LOCALE || 'en',
-  },
-
-  /*
-  ** Headers of the page
-  */
+  // Global page headers: https://go.nuxtjs.dev/config-head
   head: {
-    title: 'The Magic Frog',
+    title: 'the-magic-frog',
     meta: [
       { charset: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-      { hid: 'description', name: 'description', content: pkg.description },
-      { hid: 'keywords', name: 'keywords', content: pkg.keywords.join(',') },
+      { hid: 'description', name: 'description', content: '' },
+      { name: 'format-detection', content: 'telephone=no' }
     ],
     link: [
       { rel: 'icon', type: 'image/x-icon', href: '/favicon.png' },
@@ -31,47 +19,57 @@ module.exports = {
       { rel: 'stylesheet', href: 'https://cdnjs.cloudflare.com/ajax/libs/cookieconsent2/3.0.3/cookieconsent.min.css' },
     ],
     script: [
-      { src: 'https://cdnjs.cloudflare.com/ajax/libs/cookieconsent2/3.0.3/cookieconsent.min.js' },
-    ],
+      { src: 'https://cdnjs.cloudflare.com/ajax/libs/cookieconsent2/3.0.3/cookieconsent.min.js' }
+    ]
   },
 
-  /*
-  ** Customize the progress-bar color
-  */
-  loading: { color: '#FFFFFF' },
-
-  /*
-  ** Global CSS
-  */
+  // Global CSS: https://go.nuxtjs.dev/config-css
   css: [
-    { src: '~assets/css/main.sass', lang: 'sass' },
+    { src: '@/assets/css/main.sass', lang: 'sass' }
   ],
 
-  /*
-  ** Plugins to load before mounting the App
-  */
+  // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
   plugins: [
     '~/plugins/i18n.js',
     '~/plugins/vue-hivesigner',
     { src: '~plugins/vue-notification', ssr: false },
-    { src: '~/plugins/cookie-consent', ssr: false },
+    { src: '~/plugins/cookie-consent', ssr: false }
   ],
 
-  /*
-  ** Nuxt.js modules
-  */
+  // Auto import components: https://go.nuxtjs.dev/config-components
+  components: true,
+
+  // Modules for dev and build (recommended): https://go.nuxtjs.dev/config-modules
+  buildModules: [
+    // https://go.nuxtjs.dev/eslint
+    '@nuxtjs/eslint-module'
+  ],
+
+  // Modules: https://go.nuxtjs.dev/config-modules
   modules: [
-    // Doc: https://bootstrap-vue.js.org/docs/
+    // https://go.nuxtjs.dev/bootstrap
     'bootstrap-vue/nuxt',
+    // https://go.nuxtjs.dev/axios
+    '@nuxtjs/axios',
+    // https://go.nuxtjs.dev/pwa
+    '@nuxtjs/pwa'
   ],
 
-  /*
-  ** Build configuration
-  */
-  build: {
-    vendor: ['steem-js-patched', 'marked', 'axios', 'vue-i18n'],
-    /*
-    ** You can extend webpack config here
-    */
+  // Axios module configuration: https://go.nuxtjs.dev/config-axios
+  axios: {
+    // Workaround to avoid enforcing hard-coded localhost:3000: https://github.com/nuxt-community/axios-module/issues/308
+    baseURL: '/'
   },
-};
+
+  // PWA module configuration: https://go.nuxtjs.dev/pwa
+  pwa: {
+    manifest: {
+      lang: 'en'
+    }
+  },
+
+  // Build Configuration: https://go.nuxtjs.dev/config-build
+  build: {
+    vendor: ['steem-js-patched', 'marked', 'axios', 'vue-i18n']
+  }
+}

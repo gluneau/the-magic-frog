@@ -1,9 +1,8 @@
 <template>
   <b-navbar toggleable="md">
+    <b-navbar-toggle target="nav_collapse" />
 
-    <b-navbar-toggle target="nav_collapse"></b-navbar-toggle>
-
-    <b-collapse is-nav id="nav_collapse">
+    <b-collapse id="nav_collapse" is-nav>
       <b-navbar-nav class="mx-auto">
         <b-nav-item v-b-modal.langModal>
           <svg style="width:24px;height:24px" viewBox="0 0 24 24">
@@ -17,11 +16,25 @@
             </svg>
           </nuxt-link>
         </li>
-        <b-nav-item v-b-modal.whatIsThisModal>{{ $t('nav.whatisthis') }}</b-nav-item>
-        <li class="nav-item"><nuxt-link to="/archive" class="nav-link">{{ $t('nav.archive') }}</nuxt-link></li>
-        <li class="nav-item"><nuxt-link to="/hall-of-fame" class="nav-link">{{ $t('nav.halloffame') }}</nuxt-link></li>
-        <b-nav-item v-b-modal.steemSignupModal>{{ $t('nav.signup') }}</b-nav-item>
-        <b-nav-item v-b-modal.scRedirectModal>{{ $t('nav.login') }}</b-nav-item>
+        <b-nav-item v-b-modal.whatIsThisModal>
+          {{ $t('nav.whatisthis') }}
+        </b-nav-item>
+        <li class="nav-item">
+          <nuxt-link to="/archive" class="nav-link">
+            {{ $t('nav.archive') }}
+          </nuxt-link>
+        </li>
+        <li class="nav-item">
+          <nuxt-link to="/hall-of-fame" class="nav-link">
+            {{ $t('nav.halloffame') }}
+          </nuxt-link>
+        </li>
+        <b-nav-item v-b-modal.steemSignupModal>
+          {{ $t('nav.signup') }}
+        </b-nav-item>
+        <b-nav-item v-b-modal.scRedirectModal>
+          {{ $t('nav.login') }}
+        </b-nav-item>
       </b-navbar-nav>
     </b-collapse>
   </b-navbar>

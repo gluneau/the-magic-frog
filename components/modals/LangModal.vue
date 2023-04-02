@@ -1,34 +1,36 @@
 <template>
   <b-modal id="langModal" :title="$t('langmodal.title')" hide-footer size="sm">
     <b-row>
-      <b-col sm="3" v-for="(lang, index) in langs" :lang="lang" :key="index" class="text-center mb-3">
+      <b-col v-for="(lang, index) in langs" :key="index" sm="3" :lang="lang" class="text-center mb-3">
         <a :href="'https://' + (lang == 'en' ? '' : lang + '.') + 'the-magic-frog.com'" class="lang-link">
-          <img :src="'/flags/' + lang + '.svg'" class="img-fluid rounded-circle"/><br>
+          <img :src="'/flags/' + lang + '.svg'" class="img-fluid rounded-circle"><br>
           {{ lang }}
         </a>
       </b-col>
-      <b-col sm="3" v-for="(lang, index) in disabledLangs" :lang="lang" :key="index + 1000" class="text-center mb-3">
-          <span class="lang-link-disabled">
-            <img :src="'/flags/' + lang + '.svg'" class="img-fluid rounded-circle"/><br>
-            {{ lang }}
-          </span>
+      <b-col v-for="(lang, index) in disabledLangs" :key="index + 1000" sm="3" :lang="lang" class="text-center mb-3">
+        <span class="lang-link-disabled">
+          <img :src="'/flags/' + lang + '.svg'" class="img-fluid rounded-circle"><br>
+          {{ lang }}
+        </span>
       </b-col>
     </b-row>
-    <p class="my-0 text-center"><i>{{ $t('langmodal.text') }}</i></p>
+    <p class="my-0 text-center">
+      <i>{{ $t('langmodal.text') }}</i>
+    </p>
   </b-modal>
 </template>
 
 <script>
-  export default {
-    computed:{
-      langs() {
-        return Object.keys(this.$i18n.messages).filter(lang => lang !== this.$i18n.locale && this.disabledLangs.indexOf(lang) === -1);
-      },
-      disabledLangs() {
-        return ['in', 'ru', 'cn', 'es'];
-      }
+export default {
+  computed: {
+    langs () {
+      return Object.keys(this.$i18n.messages).filter(lang => lang !== this.$i18n.locale && !this.disabledLangs.includes(lang))
+    },
+    disabledLangs () {
+      return ['in', 'ru', 'cn', 'es']
     }
-  };
+  }
+}
 </script>
 
 <style lang="sass">

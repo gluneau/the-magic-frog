@@ -7,7 +7,7 @@
     <b>{{ $t('footer.maintainers') }}</b><br>
     {{ $t('footer.french') }} <a href="https://hive.blog/@helo" target="_blank">@helo</a> (<a href="https://hivesigner.com/sign/account-witness-vote?witness=helo&approve=1" target="_blank">{{ $t('footer.vote') }}</a>)<br>
     {{ $t('footer.german') }} <a href="https://hive.blog/@mkt" target="_blank">@mkt</a><br>
-     {{ $t('footer.portuguese') }} <a href="https://hive.blog/@juniorfrederico" target="_blank">@juniorfrederico</a>
+    {{ $t('footer.portuguese') }} <a href="https://hive.blog/@juniorfrederico" target="_blank">@juniorfrederico</a>
   </div>
 </template>
 

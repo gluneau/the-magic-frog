@@ -1,29 +1,29 @@
 export default {
-  pot(state) {
-    return state.pot;
+  pot (state) {
+    return state.pot
   },
-  currentCommands(state) {
-    return state.currentCommands;
+  currentCommands (state) {
+    return state.currentCommands
   },
-  stories(state) {
-    return state.stories;
+  stories (state) {
+    return state.stories
   },
-  allStoryPosts(state) {
-    return state.allStoryPosts;
+  allStoryPosts (state) {
+    return state.allStoryPosts
   },
-  contributors(state) {
-    return state.contributors;
+  contributors (state) {
+    return state.contributors
   },
-  delegators(state) {
-    return state.delegators;
+  delegators (state) {
+    return state.delegators
   },
-  curators(state) {
-    return state.curators;
+  curators (state) {
+    return state.curators
   },
-  rsharesToHBDFactor(state) {
-    return state.rsharesToHBDFactor;
+  rsharesToHBDFactor (state) {
+    return state.rsharesToHBDFactor
   },
-  showUsernames(state) {
-    return state.showUsernames;
-  },
-};
+  showUsernames (state) {
+    return state.showUsernames
+  }
+}
